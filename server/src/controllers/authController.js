@@ -65,6 +65,7 @@ class AuthController {
         success: true,
         message: "User registered successfully",
         user: userData,
+        token
       });
     } catch (error) {
       return res.status(500).json({
@@ -120,6 +121,7 @@ class AuthController {
         success: true,
         message: "Login successful",
         user: userData,
+        token,
       });
     } catch (error) {
       return res.status(500).json({
