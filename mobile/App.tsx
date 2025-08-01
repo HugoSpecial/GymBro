@@ -10,13 +10,15 @@ import Register from "./app/pages/Register";
 import RecoverPassword from "./app/pages/RecoverPassword";
 import PassOTP from "./app/pages/PassOTP";
 import NewPassword from "./app/pages/NewPassword";
+import "./global.css"
+
 
 const Stack = createNativeStackNavigator();
 
 export default function App() {
   return (
     <>
-      <StatusBar style="auto" />
+      <StatusBar style="light" />
       <AuthProvider>
         <Layout />
       </AuthProvider>

@@ -1,10 +1,21 @@
-import { View, Text, StyleSheet, TextInput, Button, Alert, TouchableOpacity } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import React, { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../Context/AuthContext";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { Ionicons } from "@expo/vector-icons";
 
-// Defina os tipos de navegação diretamente no componente
 type RootStackParamList = {
   Login: undefined;
   Register: undefined;
@@ -15,10 +26,10 @@ const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { onRegister } = useAuth();
 
-  // Use NativeStackNavigationProp ao invés de StackNavigationProp
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleRegister = async () => {
@@ -28,14 +39,14 @@ const Register = () => {
     }
 
     setIsLoading(true);
-    
+
     try {
       if (!onRegister) {
         throw new Error("Função de registro não disponível");
       }
 
       const result = await onRegister(name, email, password);
-      
+
       if (result?.error) {
         Alert.alert("Erro no registro", result.error.message);
       }
@@ -48,89 +59,122 @@ const Register = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Criar Conta</Text>
-      
-      <View style={styles.form}>
-        <TextInput
-          style={styles.input}
-          placeholder="Nome completo"
-          onChangeText={setName}
-          value={name}
-          editable={!isLoading}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Email"
-          onChangeText={setEmail}
-          value={email}
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          editable={!isLoading}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Senha"
-          secureTextEntry={true}
-          onChangeText={setPassword}
-          value={password}
-          editable={!isLoading}
-        />
-
-        <Button 
-          title={isLoading ? "Criando conta..." : "Registrar"} 
-          onPress={handleRegister} 
-          disabled={isLoading}
-        />
-      </View>
-
-      <TouchableOpacity 
-        onPress={() => navigation.navigate("Login")}
-        disabled={isLoading}
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.loginLink}>Já tem uma conta? Faça login</Text>
-      </TouchableOpacity>
-    </View>
+        <View className="flex-1 bg-slate-100">
+          {/* Background Image */}
+          <View className="absolute w-full h-full">
+            <ImageBackground
+              source={require("../../assets/2.jpeg")}
+              className="w-full h-3/5"
+              resizeMode="cover"
+            >
+              <View className="absolute inset-0 bg-black opacity-20" />
+            </ImageBackground>
+          </View>
+
+          {/* Header */}
+          <SafeAreaView className="flex-1">
+            <View className="px-8 pt-5">
+              <Text className="text-white text-4xl font-extrabold">Criar Conta</Text>
+              <Text className="text-white text-lg mt-2 opacity-70">
+                Junta-te à aventura!
+              </Text>
+            </View>
+          </SafeAreaView>
+
+          {/* Form Container */}
+          <View className="absolute bottom-0 w-full bg-white rounded-t-3xl p-8 h-[460px]">
+            {/* Name Input */}
+            <View className="mb-4">
+              <Text className="text-gray-800 font-medium mb-1">Nome</Text>
+              <View className="flex-row items-center h-14 border rounded-xl px-4 border-gray-300">
+                <TextInput
+                  className="flex-1 h-full text-gray-900"
+                  placeholder="Hugo Especial"
+                  placeholderTextColor="#999"
+                  value={name}
+                  onChangeText={setName}
+                  editable={!isLoading}
+                />
+              </View>
+            </View>
+
+            {/* Email Input */}
+            <View className="mb-4">
+              <Text className="text-gray-800 font-medium mb-1">Email</Text>
+              <View className="flex-row items-center h-14 border rounded-xl px-4 border-gray-300">
+                <TextInput
+                  className="flex-1 h-full text-gray-900"
+                  placeholder="email@exemplo.com"
+                  placeholderTextColor="#999"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  value={email}
+                  onChangeText={setEmail}
+                  editable={!isLoading}
+                />
+              </View>
+            </View>
+
+            {/* Password Input */}
+            <View className="mb-4">
+              <Text className="text-gray-800 font-medium mb-1">Password</Text>
+              <View className="flex-row items-center h-14 border rounded-xl px-4 border-gray-300">
+                <TextInput
+                  className="flex-1 h-full text-gray-900"
+                  placeholder="******"
+                  placeholderTextColor="#999"
+                  secureTextEntry={!passwordVisible}
+                  value={password}
+                  onChangeText={setPassword}
+                  editable={!isLoading}
+                />
+                <TouchableOpacity
+                  onPress={() => setPasswordVisible(!passwordVisible)}
+                  className="ml-2"
+                >
+                  <Ionicons
+                    name={passwordVisible ? "eye" : "eye-off"}
+                    size={24}
+                    color="gray"
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Register Button */}
+            <TouchableOpacity
+              className="bg-red-600 rounded-xl w-full h-14 items-center justify-center my-4"
+              onPress={handleRegister}
+              disabled={isLoading}
+            >
+              <Text className="text-white text-lg font-bold tracking-wider">
+                {isLoading ? "A Criar..." : "Criar Conta"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Login Link */}
+            <View className="flex-row justify-center mt-4">
+              <Text className="text-gray-700">Já tem conta? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                <Text className="text-red-600 font-bold">Entra Aqui!</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 30,
-    color: '#333',
-  },
-  form: {
-    width: '100%',
-    maxWidth: 400,
-    gap: 15,
-    marginBottom: 30,
-  },
-  input: {
-    height: 50,
-    borderColor: '#ddd',
-    borderWidth: 1,
-    borderRadius: 8,
-    paddingHorizontal: 15,
-    backgroundColor: 'white',
-    fontSize: 16,
-  },
-  loginLink: {
-    marginTop: 20,
-    color: '#007AFF',
-    fontSize: 16,
-    textAlign: 'center',
-  },
-});
 export default Register;

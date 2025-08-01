@@ -1,376 +1,167 @@
-// import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, KeyboardAvoidingView, Platform } from 'react-native';
-// import React, { useState } from 'react';
-// import { useNavigation } from '@react-navigation/native';
-// import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-// import { useAuth } from '../Context/AuthContext';
-
-// type RootStackParamList = {
-//   Login: undefined;
-//   NewPassword: undefined;
-// };
-
-// const NewPassword = () => {
-//   const [newPassword, setNewPassword] = useState('');
-//   const [confirmPassword, setConfirmPassword] = useState('');
-//   const [isLoading, setIsLoading] = useState(false);
-//   const [passwordVisible, setPasswordVisible] = useState(false);
-//   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-// const {onNewPassword} = useAuth();
-
-// const handleResetPassword = async () => {
-//     if (!newPassword || !confirmPassword) {
-//         Alert.alert('Erro', 'Por favor, preencha todos os campos');
-//         return;
-//     }
-    
-//     if (newPassword !== confirmPassword) {
-//         Alert.alert('Erro', 'As senhas não coincidem');
-//         return;
-//     }
-    
-//     setIsLoading(true);
-    
-// try {
-//             if (!onNewPassword) {
-//               throw new Error("Função de redefinição de senha não disponível");
-//             }
-      
-//             const result = await onNewPassword(email, password);
-                    
-//             if (result?.error) {
-//               Alert.alert("Erro", result.error.message);
-//             } else {
-//               navigation.navigate("Login"); 
-//             }
-// } catch (error) {
-//         Alert.alert('Erro', 'Ocorreu um erro ao redefinir a senha');
-//         console.error('Reset password error:', error);
-//     }
-    
-// }
-// };
-
-
-//   return (
-//     <KeyboardAvoidingView
-//       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-//       style={styles.container}
-//     >
-//       <View style={styles.innerContainer}>
-//         <Text style={styles.title}>Criar Nova Senha</Text>
-        
-//         <Text style={styles.instructions}>
-//           Crie uma nova senha segura para sua conta
-//         </Text>
-        
-//         <View style={styles.passwordContainer}>
-//           <TextInput
-//             style={styles.input}
-//             placeholder="Nova senha"
-//             secureTextEntry={!passwordVisible}
-//             value={newPassword}
-//             onChangeText={setNewPassword}
-//             editable={!isLoading}
-//           />
-//           <TouchableOpacity 
-//             style={styles.visibilityToggle}
-//             onPress={() => setPasswordVisible(!passwordVisible)}
-//           >
-//             <Text style={styles.visibilityText}>
-//               {passwordVisible ? '👁️' : '👁️‍🗨️'}
-//             </Text>
-//           </TouchableOpacity>
-//         </View>
-        
-//         <TextInput
-//           style={styles.input}
-//           placeholder="Confirmar nova senha"
-//           secureTextEntry={!passwordVisible}
-//           value={confirmPassword}
-//           onChangeText={setConfirmPassword}
-//           editable={!isLoading}
-//         />
-        
-//         <TouchableOpacity
-//           style={[styles.button, isLoading && styles.buttonDisabled]}
-//           onPress={handleResetPassword}
-//           disabled={isLoading}
-//         >
-//           <Text style={styles.buttonText}>
-//             {isLoading ? 'Atualizando...' : 'Redefinir Senha'}
-//           </Text>
-//         </TouchableOpacity>
-        
-
-//       </View>
-//     </KeyboardAvoidingView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//   },
-//   innerContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     padding: 24,
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//     marginBottom: 16,
-//     textAlign: 'center',
-//     color: '#333',
-//   },
-//   instructions: {
-//     fontSize: 16,
-//     textAlign: 'center',
-//     marginBottom: 32,
-//     color: '#666',
-//     paddingHorizontal: 20,
-//   },
-//   passwordContainer: {
-//     position: 'relative',
-//     marginBottom: 16,
-//   },
-//   input: {
-//     height: 50,
-//     borderWidth: 1,
-//     borderColor: '#ddd',
-//     borderRadius: 8,
-//     paddingHorizontal: 16,
-//     fontSize: 16,
-//     backgroundColor: '#f9f9f9',
-//   },
-//   visibilityToggle: {
-//     position: 'absolute',
-//     right: 15,
-//     top: 12,
-//   },
-//   visibilityText: {
-//     fontSize: 20,
-//   },
-//   button: {
-//     backgroundColor: '#007AFF',
-//     padding: 16,
-//     borderRadius: 8,
-//     alignItems: 'center',
-//     marginTop: 16,
-//     marginBottom: 24,
-//   },
-//   buttonDisabled: {
-//     backgroundColor: '#99C8FF',
-//   },
-//   buttonText: {
-//     color: '#fff',
-//     fontSize: 16,
-//     fontWeight: '600',
-//   },
-//   passwordRules: {
-//     marginTop: 8,
-//     paddingHorizontal: 16,
-//   },
-//   ruleText: {
-//     color: '#666',
-//     fontSize: 14,
-//     marginBottom: 4,
-//   },
-// });
-
-// export default NewPassword;
-
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-  } from "react-native";
-  import React, { useState } from "react";
-  import { useNavigation, useRoute } from "@react-navigation/native";
-  import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-  import { useAuth } from "../Context/AuthContext";
-  
-  type RootStackParamList = {
-    Login: undefined;
-    PassOTP: { email: string };
-    NewPassword: { email: string; otp: string }; 
-    RecoverPassword: undefined;
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
+import React, { useState } from "react";
+import { useNavigation, useRoute } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuth } from "../Context/AuthContext";
+import { Ionicons } from "@expo/vector-icons";
+
+type RootStackParamList = {
+  Login: undefined;
+  PassOTP: { email: string };
+  NewPassword: { email: string; otp: string };
+  RecoverPassword: undefined;
+};
+
+const NewPassword = () => {
+  const [newPassword, setNewPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [passwordVisible, setPasswordVisible] = useState(false);
+
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute();
+  const { email, otp } = route.params as { email: string; otp: string };
+  const { onNewPassword } = useAuth();
+
+  const handleResetPassword = async () => {
+    if (!newPassword) {
+      Alert.alert("Erro", "Por favor, insira a nova password");
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      Alert.alert("Erro", "A password deve ter pelo menos 6 caracteres");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result = await onNewPassword(email, otp, newPassword);
+
+      if (result?.error) {
+        Alert.alert("Erro", result.error.message);
+      } else {
+        Alert.alert("Sucesso", "Password redefinida com sucesso");
+        navigation.navigate("Login");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Ocorreu um erro ao redefinir a password");
+    } finally {
+      setIsLoading(false);
+    }
   };
-  
-  
-  const NewPassword = () => {
-    const [newPassword, setNewPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const [passwordVisible, setPasswordVisible] = useState(false);
-  
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-    const route = useRoute();
-    const { email, otp } = route.params as { email: string; otp: string };
-  
-    const { onNewPassword } = useAuth();
-  
-    const handleResetPassword = async () => {
-      if (!newPassword || !confirmPassword) {
-        Alert.alert("Erro", "Por favor, preencha todos os campos");
-        return;
-      }
-  
-      if (newPassword !== confirmPassword) {
-        Alert.alert("Erro", "As senhas não coincidem");
-        return;
-      }
-  
-      setIsLoading(true);
-  
-      try {
-        const result = await onNewPassword(email, otp, newPassword);
-  
-        if (result?.error) {
-          Alert.alert("Erro", result.error.message);
-        } else {
-          Alert.alert("Sucesso", "Senha redefinida com sucesso");
-          navigation.navigate("Login");
-        }
-      } catch (error) {
-        Alert.alert("Erro", "Ocorreu um erro ao redefinir a senha");
-        console.error("Reset password error:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-  
-    return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+
+  return (
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.innerContainer}>
-          <Text style={styles.title}>Criar Nova Senha</Text>
-  
-          <Text style={styles.instructions}>
-            Crie uma nova senha segura para sua conta
-          </Text>
-  
-          <View style={styles.passwordContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder="Nova senha"
-              secureTextEntry={!passwordVisible}
-              value={newPassword}
-              onChangeText={setNewPassword}
-              editable={!isLoading}
-            />
-            <TouchableOpacity
-              style={styles.visibilityToggle}
-              onPress={() => setPasswordVisible(!passwordVisible)}
+        <View className="flex-1 bg-slate-100">
+          {/* Background */}
+          <View className="absolute w-full h-full">
+            <ImageBackground
+              source={require("../../assets/3.jpeg")}
+              className="w-full h-4/5"
+              resizeMode="cover"
             >
-              <Text style={styles.visibilityText}>
-                {passwordVisible ? "👁️" : "👁️‍🗨️"}
+              <View className="absolute inset-0 bg-black opacity-20" />
+            </ImageBackground>
+          </View>
+
+          {/* Header */}
+          <SafeAreaView className="flex-1">
+            <View className="px-8 pt-8">
+              <Text className="text-white text-4xl font-extrabold">
+                Nova Password
+              </Text>
+              <Text className="text-white text-base mt-2">
+                Crie uma password segura
+              </Text>
+            </View>
+          </SafeAreaView>
+
+          {/* Form */}
+          <View className="absolute bottom-0 w-full bg-white rounded-t-3xl p-8 h-[350px]">
+            <Text className="text-gray-700 text-base text-center mb-6">
+              Insira sua nova Password abaixo
+            </Text>
+
+            {/* Password Input */}
+            <View className="relative mb-6">
+              <TextInput
+                className="h-14 border border-gray-300 rounded-xl px-4 bg-gray-100 text-base"
+                placeholder="Nova Password"
+                secureTextEntry={!passwordVisible}
+                value={newPassword}
+                onChangeText={setNewPassword}
+                editable={!isLoading}
+              />
+              <TouchableOpacity
+                className="absolute right-4 top-3"
+                onPress={() => setPasswordVisible(!passwordVisible)}
+              >
+                <Ionicons
+                  name={passwordVisible ? "eye" : "eye-off"}
+                  size={24}
+                  color="gray"
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Password Requirements */}
+            <View className="mb-6">
+              <Text className="text-gray-500 text-sm">
+                A password deve conter pelo menos:
+              </Text>
+              <Text className="text-gray-500 text-sm">• 6 caracteres</Text>
+            </View>
+
+            {/* Reset Password Button */}
+            <TouchableOpacity
+              className={`${
+                isLoading ? "bg-red-300" : "bg-red-600"
+              } rounded-xl w-full h-14 items-center justify-center mb-4`}
+              onPress={handleResetPassword}
+              disabled={isLoading}
+            >
+              <Text className="text-white text-lg font-bold tracking-wider">
+                {isLoading ? "Atualizando..." : "Alterar Password"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Back to Login */}
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Login")}
+              disabled={isLoading}
+              className="items-center"
+            >
+              <Text className="text-gray-500 text-sm font-semibold mt-6">
+                Voltar para o Login
               </Text>
             </TouchableOpacity>
           </View>
-  
-          <TextInput
-            style={styles.input}
-            placeholder="Confirmar nova senha"
-            secureTextEntry={!passwordVisible}
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            editable={!isLoading}
-          />
-  
-          <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleResetPassword}
-            disabled={isLoading}
-          >
-            <Text style={styles.buttonText}>
-              {isLoading ? "Atualizando..." : "Redefinir Senha"}
-            </Text>
-          </TouchableOpacity>
         </View>
-      </KeyboardAvoidingView>
-    );
-  };
-  
-  const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  innerContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    padding: 24,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
-    color: '#333',
-  },
-  instructions: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 32,
-    color: '#666',
-    paddingHorizontal: 20,
-  },
-  passwordContainer: {
-    position: 'relative',
-    marginBottom: 16,
-  },
-  input: {
-    height: 50,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 16,
-    fontSize: 16,
-    backgroundColor: '#f9f9f9',
-  },
-  visibilityToggle: {
-    position: 'absolute',
-    right: 15,
-    top: 12,
-  },
-  visibilityText: {
-    fontSize: 20,
-  },
-  button: {
-    backgroundColor: '#007AFF',
-    padding: 16,
-    borderRadius: 8,
-    alignItems: 'center',
-    marginTop: 16,
-    marginBottom: 24,
-  },
-  buttonDisabled: {
-    backgroundColor: '#99C8FF',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  passwordRules: {
-    marginTop: 8,
-    paddingHorizontal: 16,
-  },
-  ruleText: {
-    color: '#666',
-    fontSize: 14,
-    marginBottom: 4,
-  },
-});
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+};
 
 export default NewPassword;

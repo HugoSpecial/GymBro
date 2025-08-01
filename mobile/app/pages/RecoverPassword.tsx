@@ -1,324 +1,144 @@
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   StyleSheet,
-//   Alert,
-//   KeyboardAvoidingView,
-//   Platform,
-// } from "react-native";
-// import React, { useState } from "react";
-// import { useNavigation } from "@react-navigation/native";
-// import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-// import PassOTP from "./PassOTP";
-// import { useAuth } from "../Context/AuthContext";
-
-// type RootStackParamList = {
-//   Login: undefined;
-//   RecoverPassword: undefined;
-//   PassOTP: undefined;
-// };
-
-// const RecoverPassword = () => {
-//   const [email, setEmail] = useState("");
-//   const [isLoading, setIsLoading] = useState(false);
-//   const navigation =
-//     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-//   const { onSendOTPEmail } = useAuth();
-
-//   const handleRecoverPassword = async () => {
-//     if (!email) {
-//       Alert.alert("Erro", "Por favor, insira seu email");
-//       return;
-//     }
-
-//     setIsLoading(true);
-
-//     try {
-//       if (!onSendOTPEmail) {
-//         throw new Error("Função de login não disponível");
-//       }
-
-//       const result = await onSendOTPEmail(email);
-
-//       setIsLoading(false);
-//       if (result?.error) {
-//         Alert.alert("Erro no envio", result.error.message);
-//       } else {
-//         navigation.navigate("PassOTP"); // Redireciona para PassOTP após envio bem-sucedido
-//       }
-//     } catch (error) {
-//       Alert.alert("Erro", "Falha ao enviar email de recuperação");
-//       console.error("Recovery error:", error);
-//     }
-
-//     // Simulação de envio de email (substitua pela sua lógica real)
-//     setTimeout(() => {
-//       setIsLoading(false);
-//       Alert.alert(
-//         "Email enviado",
-//         `Código de recuperação foi enviado para ${email}`,
-//         [
-//           {
-//             text: "OK",
-//             onPress: () => navigation.navigate("PassOTP"),
-//           },
-//         ]
-//       );
-//     }, 1500);
-//   };
-
-//   return (
-//     <KeyboardAvoidingView
-//       behavior={Platform.OS === "ios" ? "padding" : "height"}
-//       style={styles.container}
-//     >
-//       <View style={styles.innerContainer}>
-//         <Text style={styles.title}>Recuperar Senha</Text>
-
-//         <Text style={styles.instructions}>
-//           Digite seu email para receber um link de recuperação
-//         </Text>
-
-//         <TextInput
-//           style={styles.input}
-//           placeholder="Seu email"
-//           keyboardType="email-address"
-//           autoCapitalize="none"
-//           autoCorrect={false}
-//           value={email}
-//           onChangeText={setEmail}
-//           editable={!isLoading}
-//         />
-
-//         <TouchableOpacity
-//           style={[styles.button, isLoading && styles.buttonDisabled]}
-//           onPress={() => navigation.navigate("PassOTP")}
-//           disabled={isLoading}
-//         >
-//           <Text style={styles.buttonText}>
-//             {isLoading ? "Enviando..." : "Enviar Codigo"}
-//           </Text>
-//         </TouchableOpacity>
-//       </View>
-//     </KeyboardAvoidingView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//   },
-//   innerContainer: {
-//     flex: 1,
-//     justifyContent: "center",
-//     padding: 24,
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     marginBottom: 16,
-//     textAlign: "center",
-//     color: "#333",
-//   },
-//   instructions: {
-//     fontSize: 16,
-//     textAlign: "center",
-//     marginBottom: 32,
-//     color: "#666",
-//     paddingHorizontal: 20,
-//   },
-//   input: {
-//     height: 50,
-//     borderWidth: 1,
-//     borderColor: "#ddd",
-//     borderRadius: 8,
-//     paddingHorizontal: 16,
-//     marginBottom: 24,
-//     fontSize: 16,
-//     backgroundColor: "#f9f9f9",
-//   },
-//   button: {
-//     backgroundColor: "#007AFF",
-//     padding: 16,
-//     borderRadius: 8,
-//     alignItems: "center",
-//     marginBottom: 24,
-//   },
-//   buttonDisabled: {
-//     backgroundColor: "#99C8FF",
-//   },
-//   buttonText: {
-//     color: "#fff",
-//     fontSize: 16,
-//     fontWeight: "600",
-//   },
-//   linkText: {
-//     color: "#007AFF",
-//     textAlign: "center",
-//     fontSize: 14,
-//   },
-// });
-
-// export default RecoverPassword;
-
 import {
-    View,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    StyleSheet,
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-  } from "react-native";
-  import React, { useState } from "react";
-  import { useNavigation } from "@react-navigation/native";
-  import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-  import { useAuth } from "../Context/AuthContext";
-  
-  type RootStackParamList = {
-    Login: undefined;
-    RecoverPassword: undefined;
-    PassOTP: { email: string }; // Adicionando email como parâmetro
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
+import React, { useState } from "react";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useAuth } from "../Context/AuthContext";
+
+type RootStackParamList = {
+  Login: undefined;
+  RecoverPassword: undefined;
+  PassOTP: { email: string };
+};
+
+const RecoverPassword = () => {
+  const [email, setEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const { onSendOTPEmail } = useAuth();
+
+  const handleRecoverPassword = async () => {
+    if (!email) {
+      Alert.alert("Erro", "Por favor, insira seu email");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result = await onSendOTPEmail(email);
+
+      if (result.error) {
+        Alert.alert("Erro", result.error.message);
+      } else {
+        navigation.navigate("PassOTP", { email });
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Ocorreu um erro inesperado");
+    } finally {
+      setIsLoading(false);
+    }
   };
-  
-  const RecoverPassword = () => {
-    const [email, setEmail] = useState("");
-    const [isLoading, setIsLoading] = useState(false);
-    const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-    const { onSendOTPEmail } = useAuth();
-  
-    const handleRecoverPassword = async () => {
-        if (!email) {
-          Alert.alert("Erro", "Por favor, insira seu email");
-          return;
-        }
-      
-        setIsLoading(true);
-        
-        try {
-          const result = await onSendOTPEmail(email);
-          
-          if (result.error) {
-            Alert.alert("Erro", result.error.message);
-          } else {
-            navigation.navigate("PassOTP", { email });
-          }
-        } catch (error) {
-          Alert.alert("Erro", "Ocorreu um erro inesperado");
-        } finally {
-          setIsLoading(false);
-        }
-      };
-  
-    return (
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={styles.container}
+
+  return (
+    <KeyboardAvoidingView
+      className="flex-1"
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+    >
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.innerContainer}>
-          <Text style={styles.title}>Recuperar Senha</Text>
-  
-          <Text style={styles.instructions}>
-            Digite seu email para receber um código de verificação
-          </Text>
-  
-          <TextInput
-            style={styles.input}
-            placeholder="Seu email"
-            placeholderTextColor="#999"
-            keyboardType="email-address"
-            autoCapitalize="none"
-            autoCorrect={false}
-            value={email}
-            onChangeText={setEmail}
-            editable={!isLoading}
-          />
-  
-          <TouchableOpacity
-            style={[styles.button, isLoading && styles.buttonDisabled]}
-            onPress={handleRecoverPassword}  // Corrigido para chamar a função handleRecoverPassword
-            disabled={isLoading}
-          >
-            <Text style={styles.buttonText}>
-              {isLoading ? "Enviando..." : "Enviar Código"}
+        <View className="flex-1 bg-slate-100">
+          {/* Background Image */}
+          <View className="absolute w-full h-full">
+            <ImageBackground
+              source={require("../../assets/3.jpeg")}
+              className="w-full h-4/5"
+              resizeMode="cover"
+            >
+              <View className="absolute inset-0 bg-black opacity-20" />
+            </ImageBackground>
+          </View>
+
+          {/* Header */}
+          <SafeAreaView className="flex-1">
+            <View className="px-8 pt-8">
+              <Text className="text-white text-4xl font-extrabold">
+                Recuperar Senha
+              </Text>
+              <Text className="text-white text-lg mt-2 opacity-70">
+                Digite seu email para continuar
+              </Text>
+            </View>
+          </SafeAreaView>
+
+          {/* Form Container */}
+          <View className="absolute bottom-0 w-full bg-white rounded-t-3xl p-8 h-[350px]">
+            {/* Instruction */}
+            <Text className="text-gray-700 text-base text-center mb-6">
+              Enviaremos um código de verificação para o seu email.
             </Text>
-          </TouchableOpacity>
-  
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Login")}
-            disabled={isLoading}
-            style={styles.backButton}
-          >
-            <Text style={styles.linkText}>Voltar para Login</Text>
-          </TouchableOpacity>
+
+            {/* Email Input */}
+            <View className="mb-4">
+              <Text className="text-gray-800 font-medium mb-1">Email</Text>
+              <View className="flex-row items-center h-14 border rounded-xl px-4 border-gray-300">
+                <TextInput
+                  className="flex-1 h-full text-gray-900"
+                  placeholder="email@exemplo.com"
+                  placeholderTextColor="#999"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  value={email}
+                  onChangeText={setEmail}
+                  editable={!isLoading}
+                />
+              </View>
+            </View>
+
+            {/* Send Button */}
+            <TouchableOpacity
+              className={`${
+                isLoading ? "bg-red-300" : "bg-red-600"
+              } rounded-xl w-full h-14 items-center justify-center my-4`}
+              onPress={handleRecoverPassword}
+              disabled={isLoading}
+            >
+              <Text className="text-white text-lg font-bold tracking-wider">
+                {isLoading ? "Enviando..." : "Enviar Código"}
+              </Text>
+            </TouchableOpacity>
+
+            {/* Back to Login */}
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Login")}
+              disabled={isLoading}
+              className="items-center mt-8"
+            >
+              <Text className="text-gray font-semibold">
+                Voltar para Login
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </KeyboardAvoidingView>
-    );
-  };
-  
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: "#fff",
-    },
-    innerContainer: {
-      flex: 1,
-      justifyContent: "center",
-      padding: 24,
-    },
-    title: {
-      fontSize: 24,
-      fontWeight: "bold",
-      marginBottom: 16,
-      textAlign: "center",
-      color: "#333",
-    },
-    instructions: {
-      fontSize: 16,
-      textAlign: "center",
-      marginBottom: 32,
-      color: "#666",
-      paddingHorizontal: 20,
-      lineHeight: 24,
-    },
-    input: {
-      height: 50,
-      borderWidth: 1,
-      borderColor: "#ddd",
-      borderRadius: 8,
-      paddingHorizontal: 16,
-      marginBottom: 24,
-      fontSize: 16,
-      backgroundColor: "#f9f9f9",
-    },
-    button: {
-      backgroundColor: "#007AFF",
-      padding: 16,
-      borderRadius: 8,
-      alignItems: "center",
-      marginBottom: 16,
-    },
-    buttonDisabled: {
-      backgroundColor: "#99C8FF",
-    },
-    buttonText: {
-      color: "#fff",
-      fontSize: 16,
-      fontWeight: "600",
-    },
-    backButton: {
-      padding: 10,
-      alignItems: "center",
-    },
-    linkText: {
-      color: "#007AFF",
-      fontSize: 14,
-      fontWeight: "500",
-    },
-  });
-  
-  export default RecoverPassword;
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+};
+
+export default RecoverPassword;

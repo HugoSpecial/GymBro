@@ -1,186 +1,18 @@
-// import {
-//   View,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   StyleSheet,
-//   Alert,
-//   KeyboardAvoidingView,
-//   Platform,
-// } from "react-native";
-// import React, { useState } from "react";
-// import { useNavigation } from "@react-navigation/native";
-// import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-// import { useAuth } from "../Context/AuthContext";
-
-// type RootStackParamList = {
-//   Login: undefined;
-//   PassOTP: undefined;
-//   ResetPassword: { email: string }; // Adicione outras rotas conforme necessário
-//   NewPassword: undefined;
-//   RecoverPassword: undefined;
-// };
-
-// const PassOTP = () => {
-//   const [otp, setOtp] = useState("");
-//   const [isLoading, setIsLoading] = useState(false);
-//   const navigation =
-//     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-
-//       const { onVerifyOTP } = useAuth();
-
-//     const handleVerifyOtp = () => {
-//         if (otp.length !== 6) {
-//         Alert.alert("Erro", "Por favor, insira o código OTP completo (6 dígitos)");
-//         return;
-//         }
-
-//         setIsLoading(true);
-
-// try {
-//     const result = await onVerifyOTP(email, otp);
-
-//               if (result.error) {
-//                 Alert.alert("Erro", result.error.message);
-//               } else {
-//                 navigation.navigate("NewPassword");
-//               }
-// } catch (error) {
-//         Alert.alert("Erro", "Código OTP inválido ou expirado");
-//         console.error("OTP verification error:", error);
-//     }
-// }
-
-//     };
-//   return (
-//     <KeyboardAvoidingView
-//       behavior={Platform.OS === "ios" ? "padding" : "height"}
-//       style={styles.container}
-//     >
-//       <View style={styles.innerContainer}>
-//         <Text style={styles.title}>Verificação de Código</Text>
-
-//         <Text style={styles.instructions}>
-//           Insira o código de 6 dígitos que enviamos para o seu email
-//         </Text>
-
-//         <TextInput
-//           style={styles.otpInput}
-//           placeholder="------"
-//           keyboardType="number-pad"
-//           maxLength={6}
-//           value={otp}
-//           onChangeText={setOtp}
-//           editable={!isLoading}
-//           textAlign="center"
-//         />
-
-//         <TouchableOpacity
-//           style={[styles.button, isLoading && styles.buttonDisabled]}
-//           onPress={handleVerifyOtp}
-//           disabled={isLoading}
-//         >
-//           <Text style={styles.buttonText}>
-//             {isLoading ? "Verificando..." : "Verificar Código"}
-//           </Text>
-//         </TouchableOpacity>
-
-//         <TouchableOpacity
-//           onPress={() => navigation.navigate("Login")}
-//           disabled={isLoading}
-//         >
-//           <Text style={styles.linkText}>Voltar para o Login</Text>
-//         </TouchableOpacity>
-//       </View>
-//     </KeyboardAvoidingView>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: "#fff",
-//   },
-//   innerContainer: {
-//     flex: 1,
-//     justifyContent: "center",
-//     padding: 24,
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: "bold",
-//     marginBottom: 16,
-//     textAlign: "center",
-//     color: "#333",
-//   },
-//   instructions: {
-//     fontSize: 16,
-//     textAlign: "center",
-//     marginBottom: 32,
-//     color: "#666",
-//     paddingHorizontal: 20,
-//   },
-//   otpInput: {
-//     height: 60,
-//     width: 200,
-//     alignSelf: "center",
-//     borderWidth: 1,
-//     borderColor: "#ddd",
-//     borderRadius: 8,
-//     fontSize: 24,
-//     letterSpacing: 10,
-//     backgroundColor: "#f9f9f9",
-//     marginBottom: 32,
-//   },
-//   button: {
-//     backgroundColor: "#007AFF",
-//     padding: 16,
-//     borderRadius: 8,
-//     alignItems: "center",
-//     marginBottom: 24,
-//   },
-//   buttonDisabled: {
-//     backgroundColor: "#99C8FF",
-//   },
-//   buttonText: {
-//     color: "#fff",
-//     fontSize: 16,
-//     fontWeight: "600",
-//   },
-//   resendContainer: {
-//     flexDirection: "row",
-//     justifyContent: "center",
-//     marginBottom: 24,
-//   },
-//   resendText: {
-//     color: "#666",
-//     marginRight: 5,
-//   },
-//   resendLink: {
-//     color: "#007AFF",
-//     fontWeight: "600",
-//   },
-//   linkText: {
-//     color: "#007AFF",
-//     textAlign: "center",
-//     fontSize: 14,
-//   },
-// });
-
-// export default PassOTP;
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
+  ImageBackground,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from "react-native";
 import React, { useState } from "react";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../Context/AuthContext";
 
 type RootStackParamList = {
@@ -197,15 +29,12 @@ const PassOTP = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute();
-  const { email } = route.params as { email: string }; // Extrai o email dos parâmetros de navegação
+  const { email } = route.params as { email: string };
   const { onVerifyOTP } = useAuth();
 
   const handleVerifyOtp = async () => {
     if (otp.length !== 6) {
-      Alert.alert(
-        "Erro",
-        "Por favor, insira o código OTP completo (6 dígitos)"
-      );
+      Alert.alert("Erro", "Por favor, insira os 6 dígitos do código OTP");
       return;
     }
 
@@ -233,123 +62,90 @@ const PassOTP = () => {
 
   return (
     <KeyboardAvoidingView
+      className="flex-1"
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
-      <View style={styles.innerContainer}>
-        <Text style={styles.title}>Verificação de Código</Text>
+      <ScrollView
+        className="flex-1"
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View className="flex-1 bg-slate-100">
+          {/* Background */}
+          <View className="absolute w-full h-full">
+            <ImageBackground
+              source={require("../../assets/3.jpeg")}
+              className="w-full h-4/5"
+              resizeMode="cover"
+            >
+              <View className="absolute inset-0 bg-black opacity-20" />
+            </ImageBackground>
+          </View>
 
-        <Text style={styles.instructions}>
-          Insira o código de 6 dígitos que enviamos para {email}
-        </Text>
+          {/* Header */}
+          <SafeAreaView className="flex-1">
+            <View className="px-8 pt-8">
+              <Text className="text-white text-4xl font-extrabold">
+                Verificação de Código
+              </Text>
+              <Text className="text-white text-base mt-2">
+                Verifique seu email
+              </Text>
+            </View>
+          </SafeAreaView>
 
-        <TextInput
-          style={styles.otpInput}
-          placeholder="------"
-          keyboardType="number-pad"
-          maxLength={6}
-          value={otp}
-          onChangeText={setOtp}
-          editable={!isLoading}
-          textAlign="center"
-        />
+          {/* Form */}
+          <View className="absolute bottom-0 w-full bg-white rounded-t-3xl p-8 h-[380px]">
+            {/* Instruction */}
+            <Text className="text-gray-700 text-base text-center">
+              Digite o código de 6 dígitos recebido por email.
+            </Text>
+            <Text className="text-gray-700 text-base mb-6">
+                Código enviado para {email}
+              </Text>
 
-        <TouchableOpacity
-          style={[styles.button, isLoading && styles.buttonDisabled]}
-          onPress={handleVerifyOtp}
-          disabled={isLoading}
-        >
-          <Text style={styles.buttonText}>
-            {isLoading ? "Verificando..." : "Verificar Código"}
-          </Text>
-        </TouchableOpacity>
+            {/* OTP Input */}
+            <TextInput
+              className="h-16 text-2xl border border-gray-300 rounded-xl my-8 bg-gray-100 text-center tracking-widest mb-6"
+              placeholder="-    -    -    -    -    -"
+              keyboardType="number-pad"
+              maxLength={6}
+              value={otp}
+              onChangeText={setOtp}
+              editable={!isLoading}
+            />
 
-        <View style={styles.resendContainer}>
-          <Text style={styles.resendText}>Não recebeu o código?</Text>
-          <TouchableOpacity disabled={isLoading}>
-            <Text style={styles.resendLink}>Reenviar OTP</Text>
-          </TouchableOpacity>
+            {/* Verify Button */}
+            <TouchableOpacity
+              className={`${
+                isLoading ? "bg-red-300" : "bg-red-600"
+              } rounded-xl w-full h-14 items-center justify-center mt-2 mb-4`}
+              onPress={handleVerifyOtp}
+              disabled={isLoading}
+            >
+              <Text className="text-white text-lg font-bold tracking-wider">
+                {isLoading ? "Verificando..." : "Verificar Código"}
+              </Text>
+            </TouchableOpacity>
+
+
+
+            {/* Back to Login */}
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Login")}
+              disabled={isLoading}
+              className="items-center"
+            >
+              <Text className="text-gray text-sm font-semibold mt-10">
+                Voltar para o Login
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-
-        <TouchableOpacity
-          onPress={() => navigation.navigate("Login")}
-          disabled={isLoading}
-        >
-          <Text style={styles.linkText}>Voltar para o Login</Text>
-        </TouchableOpacity>
-      </View>
+      </ScrollView>
     </KeyboardAvoidingView>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  innerContainer: {
-    flex: 1,
-    justifyContent: "center",
-    padding: 24,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 16,
-    textAlign: "center",
-    color: "#333",
-  },
-  instructions: {
-    fontSize: 16,
-    textAlign: "center",
-    marginBottom: 32,
-    color: "#666",
-    paddingHorizontal: 20,
-  },
-  otpInput: {
-    height: 60,
-    width: 200,
-    alignSelf: "center",
-    borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
-    fontSize: 24,
-    letterSpacing: 10,
-    backgroundColor: "#f9f9f9",
-    marginBottom: 32,
-  },
-  button: {
-    backgroundColor: "#007AFF",
-    padding: 16,
-    borderRadius: 8,
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  buttonDisabled: {
-    backgroundColor: "#99C8FF",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  resendContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 24,
-  },
-  resendText: {
-    color: "#666",
-    marginRight: 5,
-  },
-  resendLink: {
-    color: "#007AFF",
-    fontWeight: "600",
-  },
-  linkText: {
-    color: "#007AFF",
-    textAlign: "center",
-    fontSize: 14,
-  },
-});
 export default PassOTP;
