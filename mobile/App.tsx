@@ -1,17 +1,17 @@
 import { StatusBar } from "expo-status-bar";
 import React from "react";
-import { Button, StyleSheet, Text, View } from "react-native";
 import { AuthProvider, useAuth } from "./app/Context/AuthContext";
+import { UserProvider } from "./app/Context/UserContext";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Home from "./app/pages/Home";
 import Login from "./app/pages/Login";
 import Register from "./app/pages/Register";
 import RecoverPassword from "./app/pages/RecoverPassword";
 import PassOTP from "./app/pages/PassOTP";
 import NewPassword from "./app/pages/NewPassword";
-import "./global.css"
-
+import "./global.css";
+import MainTabs from "./app/components/MainTabs"; // Importe o MainTabs
+import ProfileEdit from "./app/pages/ProfileEdit";
 
 const Stack = createNativeStackNavigator();
 
@@ -20,7 +20,9 @@ export default function App() {
     <>
       <StatusBar style="light" />
       <AuthProvider>
-        <Layout />
+        <UserProvider>
+          <Layout />
+        </UserProvider>
       </AuthProvider>
     </>
   );
@@ -32,47 +34,48 @@ export const Layout = () => {
     <NavigationContainer>
       <Stack.Navigator>
         {authState?.authenticated ? (
-          <Stack.Screen
-            name="Home"
-            component={Home}
-            options={{
-              title: 'Início',
-              headerRight: () => (
-                <Button 
-                  onPress={onLogout} 
-                  title="Sair" 
-                  color="#FF3B30"
-                />
-              ),
-              headerStyle: {
-                backgroundColor: '#f5f5f5',
-              },
-              headerTitleStyle: {
-                fontWeight: 'bold',
-              }
-            }}
-          />
+          <>
+            <Stack.Screen
+              name="MainTabs"
+              component={MainTabs}
+              options={{ headerShown: false }}
+            />
+
+            <Stack.Screen
+              name="ProfileEdit"
+              component={ProfileEdit}
+              options={{
+                title: "Editar Perfil",
+                headerStyle: {
+                  backgroundColor: "#f5f5f5",
+                },
+                headerTitleStyle: {
+                  fontWeight: "bold",
+                },
+              }}
+            />
+          </>
         ) : (
           <>
             <Stack.Screen
               name="Login"
               component={Login}
               options={{
-                headerShown: false
+                headerShown: false,
               }}
             />
             <Stack.Screen
               name="Register"
               component={Register}
               options={{
-                headerShown: false
+                headerShown: false,
               }}
             />
             <Stack.Screen
               name="RecoverPassword"
               component={RecoverPassword}
               options={{
-                headerShown: false
+                headerShown: false,
               }}
             />
             <Stack.Screen
@@ -80,7 +83,7 @@ export const Layout = () => {
               component={PassOTP}
               options={{
                 headerShown: false,
-                title: 'Verificação OTP'
+                title: "Verificação OTP",
               }}
             />
             <Stack.Screen
@@ -88,7 +91,7 @@ export const Layout = () => {
               component={NewPassword}
               options={{
                 headerShown: false,
-                title: 'Nova Senha'
+                title: "Nova Senha",
               }}
             />
           </>
