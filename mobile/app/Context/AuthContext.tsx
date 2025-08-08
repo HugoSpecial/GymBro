@@ -48,7 +48,9 @@ interface AuthContextType {
 }
 
 const TOKEN_KEY = "authToken";
-export const API_URL = "http://localhost:4000/api/auth";
+// export const API_URL = "http://localhost:4000/api/auth";
+export const API_URL = "http://127.0.0.1:4000/api/auth";
+
 
 const AuthContext = createContext<AuthContextType>({
   authState: { token: null, authenticated: null },

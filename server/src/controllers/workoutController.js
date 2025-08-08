@@ -1,33 +1,80 @@
 import workoutModel from "../models/workoutModel.js";
 
 class WorkoutController {
+  //   createWorkout = async (req, res) => {
+  //     try {
+  //       console.log("Dados recebidos:", req.body); // Adicione este log
+  //       console.log("Usuário autenticado:", req.user); // Verifique o usuário
+
+  //       const { exercises } = req.body;
+
+  //       if (!exercises || !Array.isArray(exercises)) {
+  //         return res.status(400).json({
+  //           success: false,
+  //           message: "Formato inválido de exercícios",
+  //         });
+  //       }
+
+  //       const newWorkout = await workoutModel.create({
+  //         user: req.user._id,
+  //         exercises,
+  //       });
+
+  //       console.log("Treino criado:", newWorkout); // Log do resultado
+
+  //       res.status(201).json({
+  //         success: true,
+  //         workout: newWorkout,
+  //       });
+  //     } catch (error) {
+  //       console.error("Erro detalhado:", error); // Log mais detalhado
+  //       res.status(500).json({
+  //         success: false,
+  //         message: error.message,
+  //       });
+  //     }
+  //   };
+
   createWorkout = async (req, res) => {
     try {
-      console.log("Dados recebidos:", req.body); // Adicione este log
-      console.log("Usuário autenticado:", req.user); // Verifique o usuário
+      console.log("Dados recebidos:", req.body); // Log para depuração
 
       const { exercises } = req.body;
 
+      // Validação adicional no backend
       if (!exercises || !Array.isArray(exercises)) {
         return res.status(400).json({
           success: false,
-          message: "Formato inválido de exercícios",
+          message: "Formato de exercícios inválido",
+        });
+      }
+
+      // Verificar se todos os exerciseIds são válidos
+      const hasInvalidExercises = exercises.some(
+        (ex) => !ex.exerciseId || typeof ex.exerciseId !== "string"
+      );
+
+      if (hasInvalidExercises) {
+        return res.status(400).json({
+          success: false,
+          message: "IDs de exercício inválidos",
         });
       }
 
       const newWorkout = await workoutModel.create({
         user: req.user._id,
-        exercises,
+        exercises: exercises.map((ex) => ({
+          exerciseId: ex.exerciseId,
+          sets: ex.sets,
+        })),
       });
-
-      console.log("Treino criado:", newWorkout); // Log do resultado
 
       res.status(201).json({
         success: true,
         workout: newWorkout,
       });
     } catch (error) {
-      console.error("Erro detalhado:", error); // Log mais detalhado
+      console.error("Erro detalhado:", error);
       res.status(500).json({
         success: false,
         message: error.message,

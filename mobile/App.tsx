@@ -10,8 +10,9 @@ import RecoverPassword from "./app/pages/RecoverPassword";
 import PassOTP from "./app/pages/PassOTP";
 import NewPassword from "./app/pages/NewPassword";
 import "./global.css";
-import MainTabs from "./app/components/MainTabs"; // Importe o MainTabs
+import MainTabs from "./app/components/MainTabs";
 import ProfileEdit from "./app/pages/ProfileEdit";
+import { WorkoutProvider } from "./app/Context/WorkoutContext";
 
 const Stack = createNativeStackNavigator();
 
@@ -21,7 +22,9 @@ export default function App() {
       <StatusBar style="light" />
       <AuthProvider>
         <UserProvider>
-          <Layout />
+          <WorkoutProvider>
+            <Layout />
+          </WorkoutProvider>
         </UserProvider>
       </AuthProvider>
     </>

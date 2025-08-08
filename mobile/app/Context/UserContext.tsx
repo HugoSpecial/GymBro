@@ -14,7 +14,9 @@ interface UserResponse {
   user: User;
 }
 
-export const API_URL = "http://localhost:4000/api/user";
+// export const API_URL = "http://localhost:4000/api/user";
+export const API_URL = "http://127.0.0.1:4000/api/user";
+
 
 const UserContext = createContext({
   user: null as User | null,
