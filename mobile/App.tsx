@@ -3,7 +3,7 @@ import React from "react";
 import { AuthProvider, useAuth } from "./app/Context/AuthContext";
 import { UserProvider } from "./app/Context/UserContext";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { createNativeStackNavigator, NativeStackNavigationOptions } from "@react-navigation/native-stack";
 import Login from "./app/pages/Login";
 import Register from "./app/pages/Register";
 import RecoverPassword from "./app/pages/RecoverPassword";
@@ -13,8 +13,35 @@ import "./global.css";
 import MainTabs from "./app/components/MainTabs";
 import ProfileEdit from "./app/pages/ProfileEdit";
 import { WorkoutProvider } from "./app/Context/WorkoutContext";
+import WorkoutDetails from "./app/pages/DetailsWorkout";
 
-const Stack = createNativeStackNavigator();
+// Definindo os tipos das rotas
+export type RootStackParamList = {
+  Login: undefined;
+  Register: undefined;
+  RecoverPassword: undefined;
+  PassOTP: undefined;
+  NewPassword: undefined;
+  MainTabs: undefined;
+  ProfileEdit: undefined;
+  WorkoutDetails: { workout: Workout };
+};
+
+// Tipo para o workout (deve corresponder ao usado em WorkoutDetails)
+interface Workout {
+  _id: string;
+  name: string;
+  date: string;
+  exercises: Array<{
+    exerciseId: string;
+    sets: Array<{
+      weight: number;
+      reps: number;
+    }>;
+  }>;
+}
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function App() {
   return (
@@ -33,9 +60,20 @@ export default function App() {
 
 export const Layout = () => {
   const { authState, onLogout } = useAuth();
+  
+  // Opções comuns de header
+  const commonHeaderOptions: NativeStackNavigationOptions = {
+    headerStyle: {
+      backgroundColor: "#ff6347", // Cor de fundo do header
+    },
+    headerTitleStyle: {
+      fontWeight: "bold",
+    },
+  };
+
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={commonHeaderOptions}>
         {authState?.authenticated ? (
           <>
             <Stack.Screen
@@ -43,19 +81,17 @@ export const Layout = () => {
               component={MainTabs}
               options={{ headerShown: false }}
             />
-
             <Stack.Screen
               name="ProfileEdit"
               component={ProfileEdit}
-              options={{
-                title: "Editar Perfil",
-                headerStyle: {
-                  backgroundColor: "#f5f5f5",
-                },
-                headerTitleStyle: {
-                  fontWeight: "bold",
-                },
-              }}
+              options={{ headerShown: false }}
+
+            />
+            <Stack.Screen
+              name="WorkoutDetails"
+              component={WorkoutDetails}
+              options={{ headerShown: false }}
+
             />
           </>
         ) : (
@@ -63,23 +99,17 @@ export const Layout = () => {
             <Stack.Screen
               name="Login"
               component={Login}
-              options={{
-                headerShown: false,
-              }}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="Register"
               component={Register}
-              options={{
-                headerShown: false,
-              }}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="RecoverPassword"
               component={RecoverPassword}
-              options={{
-                headerShown: false,
-              }}
+              options={{ headerShown: false }}
             />
             <Stack.Screen
               name="PassOTP"

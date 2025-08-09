@@ -10,6 +10,11 @@ const workoutSchema = new mongoose.Schema({
     type: Date, 
     default: Date.now 
   },
+  name: {
+    type: String,
+    required: true,
+    trim: true
+  },
   exercises: [{
     exerciseId: { 
       type: mongoose.Schema.Types.ObjectId, 

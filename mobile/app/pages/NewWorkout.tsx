@@ -7,6 +7,7 @@ import {
   ScrollView,
   ActivityIndicator,
   SafeAreaView,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useWorkout } from "../Context/WorkoutContext";
@@ -26,6 +27,7 @@ const NewWorkout: React.FC = () => {
     clearError,
   } = useWorkout();
 
+  const [workoutName, setWorkoutName] = useState("");
   const [search, setSearch] = useState("");
   const [selectedExercises, setSelectedExercises] = useState<
     { exerciseId: string; name: string; sets: SetInput[] }[]
@@ -94,19 +96,43 @@ const NewWorkout: React.FC = () => {
   };
 
   const handleSaveWorkout = async () => {
+    if (!workoutName.trim()) {
+      Alert.alert("Erro", "Por favor, dê um nome ao seu treino");
+      return;
+    }
+
+    if (selectedExercises.length === 0) {
+      Alert.alert("Erro", "Adicione pelo menos um exercício ao treino");
+      return;
+    }
+
+    // Validate all sets have valid numbers
+    const hasInvalidSets = selectedExercises.some((exercise) =>
+      exercise.sets.some(
+        (set) => isNaN(parseFloat(set.weight)) || isNaN(parseInt(set.reps))
+      )
+    );
+
+    if (hasInvalidSets) {
+      Alert.alert("Erro", "Por favor, insira valores válidos para peso e repetições");
+      return;
+    }
+
     // Convert string inputs to numbers before saving
     const workoutToSave = selectedExercises.map((exercise) => ({
       exerciseId: exercise.exerciseId,
       sets: exercise.sets.map((set) => ({
-        weight: parseFloat(set.weight) || 0,
-        reps: parseInt(set.reps) || 0,
+        weight: parseFloat(set.weight),
+        reps: parseInt(set.reps),
       })),
     }));
 
-    const success = await createWorkout(workoutToSave);
+    const success = await createWorkout(workoutName, workoutToSave);
     if (success) {
       setSelectedExercises([]);
+      setWorkoutName("");
       setSearch("");
+      Alert.alert("Sucesso", "Treino criado com sucesso!");
     }
   };
 
@@ -123,6 +149,19 @@ const NewWorkout: React.FC = () => {
             </TouchableOpacity>
           </View>
         )}
+
+        {/* Workout Name Input */}
+        <View className="mb-4">
+          <Text className="text-white text-base font-medium mb-2">Nome do Treino</Text>
+          <TextInput
+            className="bg-gray-800 p-3 rounded-lg text-white border border-gray-600"
+            value={workoutName}
+            onChangeText={setWorkoutName}
+            placeholder="Digite o nome do treino"
+            placeholderTextColor="#999"
+            maxLength={50}
+          />
+        </View>
 
         {/* Search field with icon */}
         <View className="flex-row items-center mb-2 bg-gray-800 rounded-lg px-3 border border-gray-600">
@@ -275,11 +314,21 @@ const NewWorkout: React.FC = () => {
             {/* Save Workout Button */}
             <TouchableOpacity
               onPress={handleSaveWorkout}
-              className="flex-row items-center justify-center bg-red-600 p-4 rounded-xl mt-6 mb-4"
+              disabled={loading}
+              className={`flex-row items-center justify-center p-4 rounded-xl mt-6 mb-4 ${
+                loading ? "bg-gray-600" : "bg-red-600"
+              }`}
             >
-              <Text className="text-white text-lg font-bold ml-2">
-                Criar Treino
-              </Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#ffffff" />
+              ) : (
+                <>
+                  <Ionicons name="save" size={20} color="white" />
+                  <Text className="text-white text-lg font-bold ml-2">
+                    Criar Treino
+                  </Text>
+                </>
+              )}
             </TouchableOpacity>
           </View>
         )}
