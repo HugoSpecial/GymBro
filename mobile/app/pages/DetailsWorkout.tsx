@@ -12,6 +12,7 @@ import { useNavigation, NavigationProp } from "@react-navigation/native";
 
 type DetailsWorkoutStackParamList = {
   MainTabs: undefined;
+  EditWorkout: { workout: Workout };
 };
 
 interface ExerciseDetails {
@@ -62,7 +63,8 @@ const WorkoutDetails = ({ route }: WorkoutDetailsProps) => {
     return exercise;
   };
 
-  const navigation = useNavigation<NavigationProp<DetailsWorkoutStackParamList>>();
+  const navigation =
+    useNavigation<NavigationProp<DetailsWorkoutStackParamList>>();
 
   return (
     <SafeAreaView className="flex-1 bg-black">
@@ -73,6 +75,15 @@ const WorkoutDetails = ({ route }: WorkoutDetailsProps) => {
         >
           <Ionicons name="arrow-back" size={24} color="#ef4444" />
           <Text className="text-[#ef4444] ml-2 font-semibold">Voltar</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => navigation.navigate("EditWorkout", { workout })}
+          className="bg-[#ef4444] rounded-lg p-4 m-4 items-center justify-end"
+        >
+          <Text className="text-white text-lg font-semibold">
+            Editar Treino
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -104,15 +115,14 @@ const WorkoutDetails = ({ route }: WorkoutDetailsProps) => {
                 {exercise.muscleGroup && (
                   <Text className="text-gray-400 mb-3">
                     Grupo muscular:{" "}
-                    <Text className="text-[#ef4444]">{exercise.muscleGroup}</Text>
+                    <Text className="text-[#ef4444]">
+                      {exercise.muscleGroup}
+                    </Text>
                   </Text>
                 )}
 
                 {item.sets.map((set, idx) => (
-                  <View
-                    key={idx}
-                    className="flex-row gap-2 mb-3 items-center"
-                  >
+                  <View key={idx} className="flex-row gap-2 mb-3 items-center">
                     {/* Weight display with icon */}
                     <View className="flex-1 flex-row items-center bg-gray-700 rounded-lg px-2 border border-gray-600">
                       <Ionicons
@@ -148,6 +158,7 @@ const WorkoutDetails = ({ route }: WorkoutDetailsProps) => {
                         value={String(set.reps)}
                         editable={false}
                       />
+                      <Text className="text-gray-400 pr-2">reps</Text>
                     </View>
                   </View>
                 ))}

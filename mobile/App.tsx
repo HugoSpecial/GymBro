@@ -3,7 +3,10 @@ import React from "react";
 import { AuthProvider, useAuth } from "./app/Context/AuthContext";
 import { UserProvider } from "./app/Context/UserContext";
 import { NavigationContainer } from "@react-navigation/native";
-import { createNativeStackNavigator, NativeStackNavigationOptions } from "@react-navigation/native-stack";
+import {
+  createNativeStackNavigator,
+  NativeStackNavigationOptions,
+} from "@react-navigation/native-stack";
 import Login from "./app/pages/Login";
 import Register from "./app/pages/Register";
 import RecoverPassword from "./app/pages/RecoverPassword";
@@ -14,6 +17,7 @@ import MainTabs from "./app/components/MainTabs";
 import ProfileEdit from "./app/pages/ProfileEdit";
 import { WorkoutProvider } from "./app/Context/WorkoutContext";
 import WorkoutDetails from "./app/pages/DetailsWorkout";
+import EditWorkout from "./app/pages/EditWorkout";
 
 // Definindo os tipos das rotas
 export type RootStackParamList = {
@@ -25,15 +29,16 @@ export type RootStackParamList = {
   MainTabs: undefined;
   ProfileEdit: undefined;
   WorkoutDetails: { workout: Workout };
+  EditWorkout: { workout: Workout };
 };
 
-// Tipo para o workout (deve corresponder ao usado em WorkoutDetails)
+
 interface Workout {
   _id: string;
   name: string;
   date: string;
   exercises: Array<{
-    exerciseId: string;
+    exerciseId: string | { _id: string; name: string };
     sets: Array<{
       weight: number;
       reps: number;
@@ -59,8 +64,8 @@ export default function App() {
 }
 
 export const Layout = () => {
-  const { authState, onLogout } = useAuth();
-  
+  const { authState } = useAuth();
+
   // Opções comuns de header
   const commonHeaderOptions: NativeStackNavigationOptions = {
     headerStyle: {
@@ -85,13 +90,16 @@ export const Layout = () => {
               name="ProfileEdit"
               component={ProfileEdit}
               options={{ headerShown: false }}
-
             />
             <Stack.Screen
               name="WorkoutDetails"
               component={WorkoutDetails}
               options={{ headerShown: false }}
-
+            />
+            <Stack.Screen
+              name="EditWorkout"
+              component={EditWorkout}
+              options={{ headerShown: false }}
             />
           </>
         ) : (

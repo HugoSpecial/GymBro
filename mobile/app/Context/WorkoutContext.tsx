@@ -6,7 +6,6 @@ import {
     ReactNode,
   } from "react";
   import axios, { AxiosError } from "axios";
-  import { Platform } from "react-native";
   
   // ===== Interfaces =====
   interface Exercise {
@@ -36,16 +35,14 @@ import {
   
   interface WorkoutContextType {
     workouts: Workout[];
-    lastThreeWorkouts: Workout[]; // <- novo
+    lastThreeWorkouts: Workout[];
     exercises: Exercise[];
     loading: boolean;
     error: string | null;
   
     fetchWorkouts: () => Promise<void>;
-    createWorkout: (
-      name: string,
-      exercises: WorkoutExercise[]
-    ) => Promise<boolean>;
+    createWorkout: (name: string, exercises: WorkoutExercise[]) => Promise<boolean>;
+    updateWorkout: (id: string, name: string, exercises: WorkoutExercise[]) => Promise<boolean>;
     deleteWorkout: (id: string) => Promise<boolean>;
   
     fetchExercises: (search?: string) => Promise<void>;
@@ -83,7 +80,7 @@ import {
   
   export const WorkoutProvider = ({ children }: WorkoutProviderProps) => {
     const [workouts, setWorkouts] = useState<Workout[]>([]);
-    const [lastThreeWorkouts, setLastThreeWorkouts] = useState<Workout[]>([]); // novo estado
+    const [lastThreeWorkouts, setLastThreeWorkouts] = useState<Workout[]>([]);
     const [exercises, setExercises] = useState<Exercise[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -101,12 +98,10 @@ import {
         if (data.success) {
           setWorkouts(data.workouts);
   
-          // Ordena por data (mais recente primeiro)
           const sorted = data.workouts.sort(
-            (a: Workout, b: Workout) => new Date(b.date).getTime() - new Date(a.date).getTime()
+            (a: Workout, b: Workout) =>
+              new Date(b.date).getTime() - new Date(a.date).getTime()
           );
-  
-          // Pega só os 3 mais recentes
           setLastThreeWorkouts(sorted.slice(0, 3));
         }
       } catch (err) {
@@ -139,18 +134,39 @@ import {
       }
     };
   
+    const updateWorkout = async (
+      id: string,
+      name: string,
+      exercises: WorkoutExercise[]
+    ): Promise<boolean> => {
+      try {
+        setLoading(true);
+        const { data } = await axios.put(`/workout/update/${id}`, {
+          name: name.trim(),
+          exercises,
+        });
+        if (data.success) {
+          await fetchWorkouts();
+          return true;
+        }
+        return false;
+      } catch (err) {
+        handleError(err, "Failed to update workout");
+        return false;
+      } finally {
+        setLoading(false);
+      }
+    };
+  
     const deleteWorkout = async (id: string): Promise<boolean> => {
       try {
         setLoading(true);
         const { data } = await axios.delete(`/workout/delete/${id}`);
         if (data.success) {
           setWorkouts((prev) => prev.filter((w) => w._id !== id));
-  
-          // Atualiza lastThreeWorkouts também, removendo o excluído e reordenando
           setLastThreeWorkouts((prev) =>
             prev.filter((w) => w._id !== id).slice(0, 3)
           );
-  
           return true;
         }
         return false;
@@ -229,12 +245,13 @@ import {
       <WorkoutContext.Provider
         value={{
           workouts,
-          lastThreeWorkouts, // expõe aqui
+          lastThreeWorkouts,
           exercises,
           loading,
           error,
           fetchWorkouts,
           createWorkout,
+          updateWorkout,
           deleteWorkout,
           fetchExercises,
           createExercise,
