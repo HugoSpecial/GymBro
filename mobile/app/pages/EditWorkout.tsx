@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,46 +8,19 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Alert,
-} from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { RootStackParamList } from "../../App";
-import { useWorkout } from "../Context/WorkoutContext";
+} from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../App';
+import { useWorkout } from '../Context/WorkoutContext';
+import { Exercise, SelectedExercise, SetInput, Workout } from '../types/workout';
 
-// Types
-interface Set {
-  weight: number;
-  reps: number;
-}
+type EditWorkoutProps = NativeStackScreenProps<RootStackParamList, 'EditWorkout'>;
 
-interface WorkoutExercise {
-  exerciseId: string | { _id: string; name: string };
-  sets: Set[];
-}
-
-interface Workout {
-  _id: string;
-  name: string;
-  exercises: WorkoutExercise[];
-}
-
-interface SetInput {
-  weight: string;
-  reps: string;
-}
-
-type Props = NativeStackScreenProps<RootStackParamList, "EditWorkout"> & {
-  route: {
-    params: {
-      workout: Workout;
-    };
-  };
-};
-
-const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
+const EditWorkout: React.FC<EditWorkoutProps> = ({ route, navigation }) => {
   const { workout } = route.params;
   const {
-    exercises,
+    exercises: searchResults,
     fetchExercises,
     updateWorkout,
     loading,
@@ -56,23 +29,33 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
   } = useWorkout();
 
   const [workoutName, setWorkoutName] = useState(workout.name);
-  const [search, setSearch] = useState("");
-  const [selectedExercises, setSelectedExercises] = useState<
-    { exerciseId: string; name: string; sets: SetInput[] }[]
-  >(
-    workout.exercises.map((ex) => ({
-      exerciseId:
-        typeof ex.exerciseId === "string" ? ex.exerciseId : ex.exerciseId._id,
-      name:
-        typeof ex.exerciseId === "string" ? "Exercício" : ex.exerciseId.name,
-      sets: ex.sets.map((set) => ({
-        weight: String(set.weight),
-        reps: String(set.reps),
-      })),
-    }))
+  const [search, setSearch] = useState('');  
+  const [selectedExercises, setSelectedExercises] = useState<SelectedExercise[]>(
+    workout_exercises.map((ex) => {
+      const exerciseDetails = typeof ex.exercised === 'string' 
+        ? {
+            id: ex.exercised,
+            name: 'Exercicio',
+            muscleGroup: 'Não especificado',
+            description: ''
+          }
+        : {
+            ...ex.exercised,
+            muscleGroup: ex.exercised.muscleGroup || 'Não especificado',
+            description: ex.exercised.description || ''
+          };
+      
+      return {
+        exercised: exerciseDetails,
+        name: exerciseDetails.name,
+        muscleGroup: exerciseDetails.muscleGroup,
+        sets: ex.sets.map((set) => ({
+          weight: String(set.weight),
+          reps: String(set.reps),
+        }))
+      };
+    })
   );
-
-  // Debounced search
   useEffect(() => {
     const timer = setTimeout(() => {
       if (search.trim().length > 1) {
@@ -82,13 +65,18 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const addExercise = (exerciseId: string, exerciseName: string) => {
-    if (!selectedExercises.some((e) => e.exerciseId === exerciseId)) {
+  const addExercise = (exercise: Exercise) => {
+    if (!selectedExercises.some(e => e.exerciseId._id === exercise._id)) {
       setSelectedExercises((prev) => [
         ...prev,
-        { exerciseId, name: exerciseName, sets: [{ weight: "", reps: "" }] },
+        { 
+          exerciseId: exercise,
+          name: exercise.name,
+          muscleGroup: exercise.muscleGroup,
+          sets: [{ weight: '', reps: '' }] 
+        },
       ]);
-      setSearch("");
+      setSearch('');
     }
   };
 
@@ -108,7 +96,7 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
   const addSet = (exerciseIndex: number) => {
     setSelectedExercises((prev) => {
       const updated = [...prev];
-      updated[exerciseIndex].sets.push({ weight: "", reps: "" });
+      updated[exerciseIndex].sets.push({ weight: '', reps: '' });
       return updated;
     });
   };
@@ -125,18 +113,18 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
 
   const removeExercise = (exerciseId: string) => {
     setSelectedExercises((prev) =>
-      prev.filter((e) => e.exerciseId !== exerciseId)
+      prev.filter(e => e.exerciseId._id !== exerciseId)
     );
   };
 
   const handleUpdateWorkout = async () => {
     if (!workoutName.trim()) {
-      Alert.alert("Erro", "Por favor, dê um nome ao seu treino");
+      Alert.alert('Erro', 'Por favor, dê um nome ao seu treino');
       return;
     }
 
     if (selectedExercises.length === 0) {
-      Alert.alert("Erro", "Adicione pelo menos um exercício ao treino");
+      Alert.alert('Erro', 'Adicione pelo menos um exercício ao treino');
       return;
     }
 
@@ -148,21 +136,22 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
 
     if (hasInvalidSets) {
       Alert.alert(
-        "Erro",
-        "Por favor, insira valores válidos para peso e repetições"
+        'Erro',
+        'Por favor, insira valores válidos para peso e repetições'
       );
       return;
     }
 
     const workoutToUpdate = selectedExercises.map((exercise) => ({
-      exerciseId: exercise.exerciseId,
+      exerciseId: exercise.exerciseId._id,
       sets: exercise.sets.map((set) => ({
         weight: parseFloat(set.weight),
         reps: parseInt(set.reps, 10),
       })),
     }));
 
-    const success = await updateWorkout(
+    try {
+      const success = await updateWorkout(
         workout._id,
         workoutName,
         workoutToUpdate
@@ -172,13 +161,22 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
         const updatedWorkout = {
           ...workout,
           name: workoutName,
-          exercises: workoutToUpdate
+          exercises: selectedExercises.map(ex => ({
+            exerciseId: ex.exerciseId,
+            sets: ex.sets.map(set => ({
+              weight: parseFloat(set.weight),
+              reps: parseInt(set.reps, 10),
+            })),
+          })),
         };
         
-        Alert.alert("Sucesso", "Treino atualizado com sucesso!");
-        navigation.navigate("WorkoutDetails", { workout: updatedWorkout });
+        Alert.alert('Sucesso', 'Treino atualizado com sucesso!');
+        navigation.navigate('WorkoutDetails', { workout: updatedWorkout });
       }
-      
+    } catch (err) {
+      Alert.alert('Erro', 'Ocorreu um erro ao atualizar o treino');
+      console.error('Update workout error:', err);
+    }
   };
 
   return (
@@ -197,7 +195,6 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
           </View>
         )}
 
-        {/* Workout Name */}
         <View className="mb-4">
           <Text className="text-white text-base font-medium mb-2">
             Nome do Treino
@@ -212,7 +209,6 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
           />
         </View>
 
-        {/* Search Bar */}
         <View className="flex-row items-center mb-2 bg-gray-800 rounded-lg px-3 border border-gray-600">
           <Ionicons name="search" size={20} color="#999" />
           <TextInput
@@ -229,15 +225,14 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
           <ActivityIndicator size="small" color="#ef4444" className="my-2" />
         )}
 
-        {/* Search Results */}
-        {search.length > 1 && exercises.length > 0 && (
+        {search.length > 1 && searchResults.length > 0 && (
           <View className="bg-gray-900 p-2 rounded-lg">
             <Text className="text-white text-base font-bold my-2">
               Resultados
             </Text>
-            {exercises.map((ex) => {
-              const isAdded = selectedExercises.some(
-                (se) => se.exerciseId === ex._id
+            {searchResults.map((ex) => {
+              const isAdded = selectedExercises.some(e => 
+                e.exerciseId._id === ex._id
               );
               return (
                 <View
@@ -252,7 +247,7 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
                   </View>
                   <TouchableOpacity
                     disabled={isAdded}
-                    onPress={() => addExercise(ex._id, ex.name)}
+                    onPress={() => addExercise(ex)}
                     className="p-2"
                   >
                     <Ionicons
@@ -267,7 +262,6 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
           </View>
         )}
 
-        {/* Selected Exercises */}
         {selectedExercises.length > 0 && (
           <View className="mt-4">
             <Text className="text-white text-base font-bold my-2">
@@ -275,15 +269,20 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
             </Text>
             {selectedExercises.map((ex, exIndex) => (
               <View
-                key={`${ex.exerciseId}-${exIndex}`}
+                key={`${ex.exerciseId._id}-${exIndex}`}
                 className="border border-gray-700 p-3 rounded-lg mb-4 bg-gray-800"
               >
                 <View className="flex-row justify-between items-center mb-3">
-                  <Text className="text-white font-bold text-lg">
-                    {ex.name}
-                  </Text>
+                  <View>
+                    <Text className="text-white font-bold text-lg">
+                      {ex.name}
+                    </Text>
+                    <Text className="text-gray-400 text-sm">
+                      {ex.muscleGroup}
+                    </Text>
+                  </View>
                   <TouchableOpacity
-                    onPress={() => removeExercise(ex.exerciseId)}
+                    onPress={() => removeExercise(ex.exerciseId._id)}
                     className="p-1"
                   >
                     <Ionicons name="trash" size={20} color="#ef4444" />
@@ -295,7 +294,6 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
                     key={`set-${setIndex}`}
                     className="flex-row gap-2 mb-2 items-center"
                   >
-                    {/* Weight */}
                     <View className="flex-1 flex-row items-center bg-gray-700 rounded-lg px-2 border border-gray-600">
                       <Ionicons name="barbell" size={16} color="#999" />
                       <TextInput
@@ -311,7 +309,6 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
                       <Text className="text-gray-400 pr-2">kg</Text>
                     </View>
 
-                    {/* Reps */}
                     <View className="flex-1 flex-row items-center bg-gray-700 rounded-lg px-2 border border-gray-600">
                       <Ionicons name="repeat" size={16} color="#999" />
                       <TextInput
@@ -337,7 +334,6 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
                   </View>
                 ))}
 
-                {/* Add Set Button */}
                 <TouchableOpacity
                   onPress={() => addSet(exIndex)}
                   className="flex-row items-center justify-center mt-2 py-2 bg-gray-700 rounded-lg"
@@ -350,7 +346,6 @@ const EditWorkout: React.FC<Props> = ({ route, navigation }) => {
               </View>
             ))}
 
-            {/* Save Button */}
             <TouchableOpacity
               onPress={handleUpdateWorkout}
               disabled={loading}

@@ -157,7 +157,7 @@ const NewWorkout: React.FC = () => {
             className="bg-gray-800 p-3 rounded-lg text-white border border-gray-600"
             value={workoutName}
             onChangeText={setWorkoutName}
-            placeholder="Digite o nome do treino"
+            placeholder="Digite o título do treino"
             placeholderTextColor="#999"
             maxLength={50}
           />

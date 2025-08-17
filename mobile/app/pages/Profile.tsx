@@ -1,11 +1,14 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  SafeAreaView,
+  ScrollView,
 } from "react-native";
-import React, { useState } from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { useUser } from "../Context/UserContext";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -26,11 +29,12 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <View className="flex-1 items-center justify-center">
-        <Text className="text-lg text-gray-600">
+      <SafeAreaView className="flex-1 bg-black items-center justify-center">
+        <ActivityIndicator size="small" color="#ef4444" />
+        <Text className="text-gray-400 mt-3">
           Carregando dados do usuário...
         </Text>
-      </View>
+      </SafeAreaView>
     );
   }
 
@@ -52,10 +56,7 @@ const Profile = () => {
       "Eliminar Conta",
       "Tem certeza que deseja eliminar sua conta permanentemente? Esta ação não pode ser desfeita.",
       [
-        {
-          text: "Cancelar",
-          style: "cancel",
-        },
+        { text: "Cancelar", style: "cancel" },
         {
           text: "Eliminar",
           style: "destructive",
@@ -70,7 +71,7 @@ const Profile = () => {
                   "Sua conta foi eliminada com sucesso."
                 );
               }
-            } catch (error) {
+            } catch {
               Alert.alert(
                 "Erro",
                 "Não foi possível eliminar a conta. Por favor, tente novamente."
@@ -85,63 +86,89 @@ const Profile = () => {
   };
 
   return (
-    <View className="flex-1 p-4 bg-gray-50 items-center justify-center">
-      <View className="w-full max-w-md bg-white rounded-lg p-6 shadow-sm">
-        <Text className="text-2xl font-bold mb-6 text-gray-800 text-center">
+    <SafeAreaView className="flex-1 bg-black">
+      <ScrollView className="p-4">
+        <Text className="text-white text-2xl font-bold mb-6 text-center">
           Perfil do Utilizador
         </Text>
 
-        <View className="mb-4">
-          <Text className="text-sm font-medium text-gray-500 mb-1">Nome</Text>
-          <Text className="text-lg text-gray-800">
-            {user.name || "Não definido"}
-          </Text>
+        {/* Profile Info Card */}
+        <View className="bg-gray-800 border border-gray-700 rounded-lg p-4 mb-6">
+          {/* Name */}
+          <View className="flex-row items-center mb-4">
+            <Ionicons name="person-outline" size={22} color="#ef4444" />
+            <View className="ml-3">
+              <Text className="text-gray-400 text-sm">Nome</Text>
+              <Text className="text-white text-lg font-medium">
+                {user.name || "Não definido"}
+              </Text>
+            </View>
+          </View>
+
+          {/* Email */}
+          <View className="flex-row items-center mb-4">
+            <Ionicons name="mail-outline" size={22} color="#ef4444" />
+            <View className="ml-3">
+              <Text className="text-gray-400 text-sm">Email</Text>
+              <Text className="text-white text-lg font-medium">
+                {user.email || "Não definido"}
+              </Text>
+            </View>
+          </View>
+
+          {/* Created At */}
+          <View className="flex-row items-center">
+            <Ionicons name="calendar-outline" size={22} color="#ef4444" />
+            <View className="ml-3">
+              <Text className="text-gray-400 text-sm">Conta criada em</Text>
+              <Text className="text-white text-lg font-medium">
+                {user.createAccountAt
+                  ? formatDate(user.createAccountAt)
+                  : "Data não disponível"}
+              </Text>
+            </View>
+          </View>
         </View>
 
-        <View className="mb-4">
-          <Text className="text-sm font-medium text-gray-500 mb-1">Email</Text>
-          <Text className="text-lg text-gray-800">
-            {user.email || "Não definido"}
-          </Text>
-        </View>
-
-        <View className="mb-6">
-          <Text className="text-sm font-medium text-gray-500 mb-1">
-            Conta criada em
-          </Text>
-          <Text className="text-lg text-gray-800">
-            {user.createAccountAt
-              ? formatDate(user.createAccountAt)
-              : "Data não disponível"}
-          </Text>
-        </View>
-
+        {/* Action Buttons */}
         <TouchableOpacity
-          className="bg-green-500 rounded-lg p-3 items-center mb-3"
           onPress={() => navigation.navigate("ProfileEdit")}
+          className="flex-row items-center justify-center py-3 px-4 bg-gray-700 rounded-lg mb-3 active:bg-gray-600"
         >
-          <Text className="text-white font-medium">Editar Perfil</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          className="bg-yellow-500 rounded-lg p-3 items-center mb-3"
-          onPress={onLogout}
-        >
-          <Text className="text-white font-medium">Logout</Text>
+          <Ionicons name="create-outline" size={20} color="#facc15" />
+          <Text className="text-yellow-400 font-medium ml-2">
+            Editar Perfil
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          className="border border-red-500 rounded-lg p-3 items-center"
+          onPress={onLogout}
+          className="flex-row items-center justify-center py-3 px-4 bg-gray-700 rounded-lg mb-3 active:bg-gray-600"
+        >
+          <Ionicons name="log-out-outline" size={20} color="#f59e0b" />
+          <Text className="text-yellow-500 font-medium ml-2">Logout</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
           onPress={handleDeleteAccount}
           disabled={isDeleting}
+          className={`flex-row items-center justify-center py-3 px-4 border rounded-lg ${
+            isDeleting ? "border-gray-500" : "border-red-500"
+          } active:bg-gray-800`}
         >
           {isDeleting ? (
             <ActivityIndicator color="#ef4444" />
           ) : (
-            <Text className="text-red-500 font-medium">Eliminar Conta</Text>
+            <>
+              <Ionicons name="trash-outline" size={20} color="#ef4444" />
+              <Text className="text-red-500 font-medium ml-2">
+                Eliminar Conta
+              </Text>
+            </>
           )}
         </TouchableOpacity>
-      </View>
-    </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
