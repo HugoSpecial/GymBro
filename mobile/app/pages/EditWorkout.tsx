@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -8,14 +8,33 @@ import {
   ActivityIndicator,
   SafeAreaView,
   Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../App';
-import { useWorkout } from '../Context/WorkoutContext';
-import { Exercise, SelectedExercise, SetInput, Workout } from '../types/workout';
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../../App";
+import { useWorkout } from "../Context/WorkoutContext";
 
-type EditWorkoutProps = NativeStackScreenProps<RootStackParamList, 'EditWorkout'>;
+type EditWorkoutProps = NativeStackScreenProps<
+  RootStackParamList,
+  "EditWorkout"
+>;
+
+interface ExerciseDetails {
+  _id: string;
+  name: string;
+  muscleGroup: string;
+  description?: string;
+}
+
+interface SelectedExercise {
+  exerciseId: ExerciseDetails;
+  name: string;
+  muscleGroup: string;
+  sets: {
+    weight: string;
+    reps: string;
+  }[];
+}
 
 const EditWorkout: React.FC<EditWorkoutProps> = ({ route, navigation }) => {
   const { workout } = route.params;
@@ -28,34 +47,35 @@ const EditWorkout: React.FC<EditWorkoutProps> = ({ route, navigation }) => {
     clearError,
   } = useWorkout();
 
-  const [workoutName, setWorkoutName] = useState(workout.name);
-  const [search, setSearch] = useState('');  
-  const [selectedExercises, setSelectedExercises] = useState<SelectedExercise[]>(
-    workout_exercises.map((ex) => {
-      const exerciseDetails = typeof ex.exercised === 'string' 
-        ? {
-            id: ex.exercised,
-            name: 'Exercicio',
-            muscleGroup: 'Não especificado',
-            description: ''
-          }
-        : {
-            ...ex.exercised,
-            muscleGroup: ex.exercised.muscleGroup || 'Não especificado',
-            description: ex.exercised.description || ''
-          };
-      
+  // estado inicial - usa exerciseDetails se existir
+  const [selectedExercises, setSelectedExercises] = useState<
+    SelectedExercise[]
+  >(
+    workout.exercises.map((ex: any) => {
+      const details: ExerciseDetails | undefined = ex.exerciseDetails; // backend devolve aqui
       return {
-        exercised: exerciseDetails,
-        name: exerciseDetails.name,
-        muscleGroup: exerciseDetails.muscleGroup,
-        sets: ex.sets.map((set) => ({
+        exerciseId: details
+          ? details
+          : {
+              _id: ex.exerciseId,
+              name: "Exercício",
+              muscleGroup: "Não especificado",
+              description: "",
+            },
+        name: details ? details.name : "Exercício",
+        muscleGroup: details ? details.muscleGroup : "Não especificado",
+        sets: ex.sets.map((set: any) => ({
           weight: String(set.weight),
           reps: String(set.reps),
-        }))
+        })),
       };
     })
   );
+
+  const [workoutName, setWorkoutName] = useState(workout.name);
+  const [search, setSearch] = useState("");
+
+  // pesquisa exercícios
   useEffect(() => {
     const timer = setTimeout(() => {
       if (search.trim().length > 1) {
@@ -65,25 +85,25 @@ const EditWorkout: React.FC<EditWorkoutProps> = ({ route, navigation }) => {
     return () => clearTimeout(timer);
   }, [search]);
 
-  const addExercise = (exercise: Exercise) => {
-    if (!selectedExercises.some(e => e.exerciseId._id === exercise._id)) {
+  const addExercise = (exercise: ExerciseDetails) => {
+    if (!selectedExercises.some((e) => e.exerciseId._id === exercise._id)) {
       setSelectedExercises((prev) => [
         ...prev,
-        { 
+        {
           exerciseId: exercise,
           name: exercise.name,
           muscleGroup: exercise.muscleGroup,
-          sets: [{ weight: '', reps: '' }] 
+          sets: [{ weight: "", reps: "" }],
         },
       ]);
-      setSearch('');
+      setSearch("");
     }
   };
 
   const updateSet = (
     exerciseIndex: number,
     setIndex: number,
-    field: keyof SetInput,
+    field: "weight" | "reps",
     value: string
   ) => {
     setSelectedExercises((prev) => {
@@ -96,7 +116,7 @@ const EditWorkout: React.FC<EditWorkoutProps> = ({ route, navigation }) => {
   const addSet = (exerciseIndex: number) => {
     setSelectedExercises((prev) => {
       const updated = [...prev];
-      updated[exerciseIndex].sets.push({ weight: '', reps: '' });
+      updated[exerciseIndex].sets.push({ weight: "", reps: "" });
       return updated;
     });
   };
@@ -113,18 +133,18 @@ const EditWorkout: React.FC<EditWorkoutProps> = ({ route, navigation }) => {
 
   const removeExercise = (exerciseId: string) => {
     setSelectedExercises((prev) =>
-      prev.filter(e => e.exerciseId._id !== exerciseId)
+      prev.filter((e) => e.exerciseId._id !== exerciseId)
     );
   };
 
   const handleUpdateWorkout = async () => {
     if (!workoutName.trim()) {
-      Alert.alert('Erro', 'Por favor, dê um nome ao seu treino');
+      Alert.alert("Erro", "Por favor, dê um nome ao seu treino");
       return;
     }
 
     if (selectedExercises.length === 0) {
-      Alert.alert('Erro', 'Adicione pelo menos um exercício ao treino');
+      Alert.alert("Erro", "Adicione pelo menos um exercício ao treino");
       return;
     }
 
@@ -133,15 +153,15 @@ const EditWorkout: React.FC<EditWorkoutProps> = ({ route, navigation }) => {
         (set) => isNaN(parseFloat(set.weight)) || isNaN(parseInt(set.reps, 10))
       )
     );
-
     if (hasInvalidSets) {
       Alert.alert(
-        'Erro',
-        'Por favor, insira valores válidos para peso e repetições'
+        "Erro",
+        "Por favor, insira valores válidos para peso e repetições"
       );
       return;
     }
 
+    // envia para API sempre só os IDs
     const workoutToUpdate = selectedExercises.map((exercise) => ({
       exerciseId: exercise.exerciseId._id,
       sets: exercise.sets.map((set) => ({
@@ -156,201 +176,236 @@ const EditWorkout: React.FC<EditWorkoutProps> = ({ route, navigation }) => {
         workoutName,
         workoutToUpdate
       );
-      
+
       if (success) {
         const updatedWorkout = {
           ...workout,
           name: workoutName,
-          exercises: selectedExercises.map(ex => ({
-            exerciseId: ex.exerciseId,
-            sets: ex.sets.map(set => ({
+          exercises: selectedExercises.map((ex) => ({
+            exerciseId: ex.exerciseId._id,
+            sets: ex.sets.map((set) => ({
               weight: parseFloat(set.weight),
               reps: parseInt(set.reps, 10),
             })),
+            exerciseDetails: ex.exerciseId, // mantém populado
           })),
         };
-        
-        Alert.alert('Sucesso', 'Treino atualizado com sucesso!');
-        navigation.navigate('WorkoutDetails', { workout: updatedWorkout });
+
+        Alert.alert("Sucesso", "Treino atualizado com sucesso!");
+        navigation.navigate("WorkoutDetails", { workout: updatedWorkout });
       }
     } catch (err) {
-      Alert.alert('Erro', 'Ocorreu um erro ao atualizar o treino');
-      console.error('Update workout error:', err);
+      Alert.alert("Erro", "Ocorreu um erro ao atualizar o treino");
+      console.error("Update workout error:", err);
     }
   };
 
   return (
     <SafeAreaView className="flex-1 bg-black">
       <ScrollView className="p-4" keyboardShouldPersistTaps="handled">
-        <Text className="text-white text-2xl font-bold mb-3">
-          Editar Treino
-        </Text>
+        {/* Header */}
+        <View className="flex-row items-center justify-between mb-6">
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            className="flex-row items-center"
+          >
+            <Ionicons name="arrow-back" size={24} color="#ef4444" />
+            <Text className="text-[#ef4444] ml-2 font-semibold">Voltar</Text>
+          </TouchableOpacity>
 
+          <Text className="text-white text-xl font-bold">Editar Treino</Text>
+
+          <View style={{ width: 24 }} />
+        </View>
+
+        {/* Error Message */}
         {error && (
-          <View className="flex-row justify-between items-center bg-red-900 p-2 mb-2 rounded">
-            <Text className="text-red-300">{error}</Text>
+          <View className="bg-red-900 p-3 rounded-lg mb-4 flex-row justify-between items-center">
+            <Text className="text-red-300 flex-1">{error}</Text>
             <TouchableOpacity onPress={clearError}>
               <Ionicons name="close" size={20} color="#fca5a5" />
             </TouchableOpacity>
           </View>
         )}
 
-        <View className="mb-4">
+        {/* Workout Name Input */}
+        <View className="mb-6">
           <Text className="text-white text-base font-medium mb-2">
             Nome do Treino
           </Text>
           <TextInput
-            className="bg-gray-800 p-3 rounded-lg text-white border border-gray-600"
+            className="bg-gray-800 p-4 rounded-lg text-white border border-gray-600"
             value={workoutName}
             onChangeText={setWorkoutName}
             placeholder="Digite o nome do treino"
             placeholderTextColor="#999"
-            maxLength={50}
           />
         </View>
 
-        <View className="flex-row items-center mb-2 bg-gray-800 rounded-lg px-3 border border-gray-600">
+        {/* Exercise Search */}
+        <View className="flex-row items-center mb-4 bg-gray-800 rounded-lg px-4 border border-gray-600">
           <Ionicons name="search" size={20} color="#999" />
           <TextInput
-            className="flex-1 p-2 text-white"
+            className="flex-1 p-3 text-white"
             value={search}
             onChangeText={setSearch}
             placeholder="Pesquisar exercício..."
             placeholderTextColor="#999"
-            clearButtonMode="while-editing"
           />
         </View>
 
+        {/* Search Results */}
         {loading && (
           <ActivityIndicator size="small" color="#ef4444" className="my-2" />
         )}
 
         {search.length > 1 && searchResults.length > 0 && (
-          <View className="bg-gray-900 p-2 rounded-lg">
-            <Text className="text-white text-base font-bold my-2">
+          <View className="bg-gray-900 p-3 rounded-lg mb-6">
+            <Text className="text-white text-base font-bold mb-3">
               Resultados
             </Text>
-            {searchResults.map((ex) => {
-              const isAdded = selectedExercises.some(e => 
-                e.exerciseId._id === ex._id
+            {searchResults.map((exercise) => {
+              const isAdded = selectedExercises.some(
+                (e) => e.exerciseId._id === exercise._id
               );
               return (
                 <View
-                  key={ex._id}
-                  className="flex-row justify-between items-center py-3 border-b border-gray-700"
+                  key={exercise._id}
+                  className="border-b border-gray-700 py-3"
                 >
-                  <View className="flex-1">
-                    <Text className="text-white font-medium">{ex.name}</Text>
-                    <Text className="text-gray-400 text-xs">
-                      {ex.muscleGroup}
-                    </Text>
+                  <View className="flex-row justify-between items-center">
+                    <View>
+                      <Text className="text-white font-medium">
+                        {exercise.name}
+                      </Text>
+                      <Text className="text-gray-400 text-sm">
+                        {exercise.muscleGroup}
+                      </Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => !isAdded && addExercise(exercise)}
+                      disabled={isAdded}
+                    >
+                      <Ionicons
+                        name={isAdded ? "checkmark-circle" : "add-circle"}
+                        size={24}
+                        color={isAdded ? "#6b7280" : "#ef4444"}
+                      />
+                    </TouchableOpacity>
                   </View>
-                  <TouchableOpacity
-                    disabled={isAdded}
-                    onPress={() => addExercise(ex)}
-                    className="p-2"
-                  >
-                    <Ionicons
-                      name={isAdded ? "checkmark-circle" : "add-circle"}
-                      size={24}
-                      color={isAdded ? "#6b7280" : "#ef4444"}
-                    />
-                  </TouchableOpacity>
                 </View>
               );
             })}
           </View>
         )}
 
+        {/* Selected Exercises */}
         {selectedExercises.length > 0 && (
-          <View className="mt-4">
-            <Text className="text-white text-base font-bold my-2">
+          <View className="mb-6">
+            <Text className="text-white text-base font-bold mb-3">
               Exercícios Selecionados
             </Text>
-            {selectedExercises.map((ex, exIndex) => (
+
+            {selectedExercises.map((exercise, exIndex) => (
               <View
-                key={`${ex.exerciseId._id}-${exIndex}`}
-                className="border border-gray-700 p-3 rounded-lg mb-4 bg-gray-800"
+                key={`${exercise.exerciseId._id}-${exIndex}`}
+                className="border border-gray-700 p-4 rounded-lg mb-4 bg-gray-800"
               >
+                {/* Exercise Header */}
                 <View className="flex-row justify-between items-center mb-3">
                   <View>
                     <Text className="text-white font-bold text-lg">
-                      {ex.name}
+                      {exercise.name}
                     </Text>
                     <Text className="text-gray-400 text-sm">
-                      {ex.muscleGroup}
+                      {exercise.muscleGroup}
                     </Text>
                   </View>
                   <TouchableOpacity
-                    onPress={() => removeExercise(ex.exerciseId._id)}
-                    className="p-1"
+                    onPress={() => removeExercise(exercise.exerciseId._id)}
                   >
                     <Ionicons name="trash" size={20} color="#ef4444" />
                   </TouchableOpacity>
                 </View>
 
-                {ex.sets.map((set, setIndex) => (
+                {/* Sets */}
+                {exercise.sets.map((set, setIndex) => (
                   <View
                     key={`set-${setIndex}`}
-                    className="flex-row gap-2 mb-2 items-center"
+                    className="flex-row items-center mb-3"
                   >
-                    <View className="flex-1 flex-row items-center bg-gray-700 rounded-lg px-2 border border-gray-600">
-                      <Ionicons name="barbell" size={16} color="#999" />
+                    {/* Weight Input */}
+                    <View className="flex-1 flex-row items-center bg-gray-700 rounded-lg px-3 mr-2 border border-gray-600">
+                      <Ionicons
+                        name="barbell"
+                        size={16}
+                        color="#999"
+                        className="mr-2"
+                      />
                       <TextInput
                         className="flex-1 p-2 text-white"
                         keyboardType="decimal-pad"
                         placeholder="Peso"
                         placeholderTextColor="#666"
                         value={set.weight}
-                        onChangeText={(val) =>
-                          updateSet(exIndex, setIndex, "weight", val)
+                        onChangeText={(value) =>
+                          updateSet(exIndex, setIndex, "weight", value)
                         }
                       />
-                      <Text className="text-gray-400 pr-2">kg</Text>
+                      <Text className="text-gray-400">kg</Text>
                     </View>
 
-                    <View className="flex-1 flex-row items-center bg-gray-700 rounded-lg px-2 border border-gray-600">
-                      <Ionicons name="repeat" size={16} color="#999" />
+                    {/* Reps Input */}
+                    <View className="flex-1 flex-row items-center bg-gray-700 rounded-lg px-3 border border-gray-600">
+                      <Ionicons
+                        name="repeat"
+                        size={16}
+                        color="#999"
+                        className="mr-2"
+                      />
                       <TextInput
                         className="flex-1 p-2 text-white"
                         keyboardType="number-pad"
                         placeholder="Reps"
                         placeholderTextColor="#666"
                         value={set.reps}
-                        onChangeText={(val) =>
-                          updateSet(exIndex, setIndex, "reps", val)
+                        onChangeText={(value) =>
+                          updateSet(exIndex, setIndex, "reps", value)
                         }
                       />
                     </View>
 
-                    {ex.sets.length > 1 && (
+                    {/* Remove Set Button */}
+                    {exercise.sets.length > 1 && (
                       <TouchableOpacity
                         onPress={() => removeSet(exIndex, setIndex)}
-                        className="p-2"
+                        className="ml-2 p-2"
                       >
-                        <Ionicons name="remove" size={20} color="#ef4444" />
+                        <Ionicons name="close" size={20} color="#ef4444" />
                       </TouchableOpacity>
                     )}
                   </View>
                 ))}
 
+                {/* Add Set Button */}
                 <TouchableOpacity
                   onPress={() => addSet(exIndex)}
-                  className="flex-row items-center justify-center mt-2 py-2 bg-gray-700 rounded-lg"
+                  className="flex-row items-center justify-center py-2 bg-gray-700 rounded-lg mt-2"
                 >
                   <Ionicons name="add" size={20} color="#ef4444" />
-                  <Text className="text-red-500 ml-2 font-medium">
+                  <Text className="text-[#ef4444] ml-2 font-medium">
                     Adicionar Série
                   </Text>
                 </TouchableOpacity>
               </View>
             ))}
 
+            {/* Save Button */}
             <TouchableOpacity
               onPress={handleUpdateWorkout}
               disabled={loading}
-              className={`flex-row items-center justify-center p-4 rounded-xl mt-6 mb-4 ${
-                loading ? "bg-gray-600" : "bg-red-600"
+              className={`flex-row items-center justify-center p-4 rounded-xl ${
+                loading ? "bg-gray-600" : "bg-[#ef4444]"
               }`}
             >
               {loading ? (
