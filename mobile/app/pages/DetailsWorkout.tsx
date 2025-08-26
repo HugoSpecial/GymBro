@@ -68,7 +68,7 @@ const WorkoutDetails = ({ route }: WorkoutDetailsProps) => {
 
   return (
     <SafeAreaView className="flex-1 bg-black">
-      <View className="flex-row items-center p-4 bg-black">
+      <View className="flex-row items-center justify-between p-4 bg-black">
         <TouchableOpacity
           onPress={() => navigation.navigate("MainTabs")}
           className="flex-row items-center"
@@ -79,9 +79,9 @@ const WorkoutDetails = ({ route }: WorkoutDetailsProps) => {
 
         <TouchableOpacity
           onPress={() => navigation.navigate("EditWorkout", { workout })}
-          className="bg-[#ef4444] rounded-lg p-4 m-4 items-center justify-end"
+          className="bg-[#ef4444] rounded-lg p-3 items-center justify-center"
         >
-          <Text className="text-white text-lg font-semibold">
+          <Text className="text-white text-base font-semibold">
             Editar Treino
           </Text>
         </TouchableOpacity>
